@@ -11,7 +11,7 @@ Persistent volume claim and link to sonarqube is missing, there are some depreca
 
 Persistent volume is used for stateful apps, like Databases for example, where the state is important. 
 This ensures that even if container is recreated it automatically connects to volume and data which has been created/stored before.
-I do understand this concept and I could use kuberneted deployments to achieve that, but sticking to requirements (Helm).
+I do understand this concept and I could use custom kubernetes deployment files to achieve that, but decided to stick to requirements (Helm).
 
 ## Prerequisites
 
@@ -61,3 +61,5 @@ It will expose sonarqube on local DNS http://sonarqube.mintos.com
 
 ### 5. Comments
 There are definitely many potential improvements in this code, this repository just gives brief overview and shows that candidate has understanding of the flow and ability to automate things, get them working/communicating together. It does not handle the installations for different OS systems and exits of some services like 'minikube tunnel' which running in background to be able to assign external IP for load balancer.
+
+uninstall_setup.sh is obsolete in scope of this task. Used it for local cleanups to make testing of full deployment flow faster.
