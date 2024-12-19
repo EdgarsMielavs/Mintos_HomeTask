@@ -37,7 +37,7 @@ Inside the cloned repository, there is a bash script called `setup_env.sh`. This
 Run the script with the following command:
 
 ```bash
-bash setup_env.sh
+./setup_env.sh
 ```
 
 ### 3. Terraform Provisioning
