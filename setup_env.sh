@@ -101,18 +101,19 @@ setup_ingress() {
     NAMESPACE="ingress-nginx"  # Change to your Ingress controller's namespace if different
     INGRESS_CONTROLLER="ingress-nginx-controller"
 
-    # Step 1: Retrieve External IP
-    EXTERNAL_IP=$(kubectl get svc $INGRESS_CONTROLLER -n $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    # Wait for the LoadBalancer external IP to be assigned
+    echo "Waiting for external IP to be assigned to the LoadBalancer..."
+    while true; do
+        EXTERNAL_IP=$(kubectl get svc $INGRESS_CONTROLLER -n $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
+        if [ -n "$EXTERNAL_IP" ]; then
+            echo "External IP assigned: $EXTERNAL_IP"
+            break
+        fi
+        echo "External IP not yet assigned. Retrying in 5 seconds..."
+        sleep 5
+    done
 
-    # Step 2: Check if External IP was retrieved
-    if [ -z "$EXTERNAL_IP" ]; then
-        echo "Error: Unable to retrieve external IP. Is the Ingress controller running and exposed?"
-        exit 1
-    fi
-
-    echo "Retrieved External IP: $EXTERNAL_IP"
-
-    # Step 3: Update /etc/hosts
+    # Update /etc/hosts
     HOSTS_ENTRY="$EXTERNAL_IP $DOMAIN"
 
     # Check if the entry already exists
