@@ -33,7 +33,6 @@ run_tool_setup() {
         install_tools
         start_minikube
         set_kubectl_context
-        setup_terraform
         setup_ingress
         apply_terraform
 
@@ -55,7 +54,7 @@ set_kubectl_context() {
 }
 
 # Function to initialize and apply Terraform configuration
-setup_terraform() {
+apply_terraform() {
 
     echo "Initializing Terraform..."
     cd terraform-project
@@ -72,15 +71,11 @@ setup_terraform() {
     # Update the repositories
     helm repo update
 
-    cd -
-}
-
-apply_terraform() {
-
     echo "Applying Terraform..."
     cd terraform-project
-    terraform init
-    
+    terraform apply -auto-approve
+
+    cd -
 }
 
 # Function to check if necessary tools are installed
