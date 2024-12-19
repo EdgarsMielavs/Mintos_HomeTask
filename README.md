@@ -6,7 +6,7 @@ Home Task for Infrastructure Engineer vacancy
 This repository provides a bash script to set up an environment with Docker, Minikube, Helm 3, and Terraform. It automates the provisioning of PostgreSQL and SonarQube using Helm charts on a Minikube cluster.
 Using Helm3 version because of the best practices, as Tiller considered as insecure.
 
-***Task is not fully finished. it spins up postgresql resource from bitnami chart, and set of sonarqube + postgresql from SonarSource.
+***Task is not fully finished. it spins up postgresql resource from bitnami chart, and set of sonarqube + postgresql from SonarSource chart (oteemo chart deprecated).
 Persistent volume claim and link to sonarqube is missing, there are some deprecations which prevented from fully completing and configuring in simple way.
 
 Persistent volume is used for stateful apps, like Databases for example, where the state is important. 
