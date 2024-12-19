@@ -18,7 +18,6 @@ run_tool_setup() {
         set_kubectl_context
         apply_terraform
         setup_ingress
-        setup_local_dns
 
         echo "SonarQube has been successfully provisioned!"
         echo "Access SonarQube using http://sonarqube.mintos.com"
@@ -65,15 +64,6 @@ install_tools() {
     ./install/install_terraform.sh
 }
 
-# Function to verify if everything is running correctly
-verify_deployment() {
-    echo "Verifying SonarQube deployment..."
-
-    # Check if SonarQube is deployed
-    kubectl get pods -n default -l app=sonarqube
-    kubectl get svc -n default
-}
-
 setup_ingress() {
     echo "Setting up ingress..."
 
@@ -82,19 +72,40 @@ setup_ingress() {
     --namespace ingress-nginx --create-namespace
 
     minikube tunnel &
+    sleep 5  # Wait a few seconds to allow tunnel to establish
 
     kubectl apply -f ingress-conf.yaml 
 
-}
+    # Variables
+    DOMAIN="sonarqube.mintos.com"
+    NAMESPACE="ingress-nginx"  # Change to your Ingress controller's namespace if different
+    INGRESS_CONTROLLER="ingress-nginx-controller"
 
-setup_local_dns() {
+    # Step 1: Retrieve External IP
+    EXTERNAL_IP=$(kubectl get svc $INGRESS_CONTROLLER -n $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
-    chmod -x ./localdns_setup.sh
-    sudo bash ./localdns_setup.sh
+    # Step 2: Check if External IP was retrieved
+    if [ -z "$EXTERNAL_IP" ]; then
+        echo "Error: Unable to retrieve external IP. Is the Ingress controller running and exposed?"
+        exit 1
+    fi
 
-    echo "Restarting NGINX Ingress controller..."
-    kubectl rollout restart deployment ingress-nginx-controller -n ingress-nginx
-    
+    echo "Retrieved External IP: $EXTERNAL_IP"
+
+    # Step 3: Update /etc/hosts
+    HOSTS_ENTRY="$EXTERNAL_IP $DOMAIN"
+
+    # Check if the entry already exists
+    if grep -q "$DOMAIN" /etc/hosts; then
+        echo "Entry for $DOMAIN already exists in /etc/hosts. Updating it."
+        sudo sed -i "/$DOMAIN/d" /etc/hosts
+    fi
+
+    # Append the new entry
+    echo "Adding $HOSTS_ENTRY to /etc/hosts"
+    echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts > /dev/null
+
+    echo "Done! You can now access the application at http://$DOMAIN"
 }
 
 # Execute the main function
