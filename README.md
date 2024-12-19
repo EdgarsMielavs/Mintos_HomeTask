@@ -55,7 +55,7 @@ Once the provisioning is complete, both PostgreSQL and SonarQube will be deploye
 
 ### 4. Ingress configuration
 
-After the script has finished running, it will configure Ingress.
+After the script has finished running, script will configure Ingress.
 Ingress being installed via Helm charts and configured in ingress-conf.yaml
 It will expose sonarqube on local DNS http://sonarqube.mintos.com
 
