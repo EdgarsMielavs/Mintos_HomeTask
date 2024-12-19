@@ -76,6 +76,8 @@ apply_terraform() {
     terraform apply -auto-approve
 
     cd -
+
+    kubectl apply -f ingress-conf.yaml 
 }
 
 # Function to check if necessary tools are installed
