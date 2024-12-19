@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# Refresh sudo credentials at the start of the script
+echo "Requesting sudo permissions..."
+sudo -v
+
+# Keep sudo active throughout the script's execution
+# This loop refreshes the sudo timestamp every 60 seconds in the background
+(
+    while true; do
+        sleep 60
+        sudo -v
+    done
+) &
+SUDO_KEEP_ALIVE_PID=$!
+
+# Function to clean up background sudo refresh on exit
+cleanup() {
+    kill $SUDO_KEEP_ALIVE_PID
+}
+trap cleanup EXIT
+
 # set -e
 
 run_docker_install() {
@@ -71,10 +91,10 @@ setup_ingress() {
     --repo https://kubernetes.github.io/ingress-nginx \
     --namespace ingress-nginx --create-namespace
 
+    kubectl apply -f ingress-conf.yaml 
+
     minikube tunnel &
     sleep 5  # Wait a few seconds to allow tunnel to establish
-
-    kubectl apply -f ingress-conf.yaml 
 
     # Variables
     DOMAIN="sonarqube.mintos.com"
