@@ -60,6 +60,6 @@ Ingress being installed via Helm charts and configured in ingress-conf.yaml
 It will expose sonarqube on local DNS http://sonarqube.mintos.com
 
 ### 5. Comments
-There are definitely many potential improvements in this code, this repository just gives brief overview and shows that candidate has understanding of the flow and ability to automate things, get them working/communicating together. It does not handle the installations for different OS systems and exits of some services like 'minikube tunnel' which running in background to be able to assign external IP for load balancer.
+There are definitely many potential improvements in this code, this repository just gives brief overview and shows that candidate has understanding of the flow and ability to automate things, get them working/communicating together. It does not handle the installations for different OS systems and proper exits of some services like 'minikube tunnel' which running in background to be able to assign external IP for load balancer.
 
 uninstall_setup.sh is obsolete in scope of this task. Used it for local cleanups to make testing of full deployment flow faster.
