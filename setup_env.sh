@@ -1,11 +1,8 @@
 #!/bin/bash
 
-# Refresh sudo credentials at the start of the script
+# Entering sudo credentials at the start of the script and keep it alive until end of execution
 echo "Requesting sudo permissions..."
 sudo -v
-
-# Keep sudo active throughout the script's execution
-# This loop refreshes the sudo timestamp every 60 seconds in the background
 (
     while true; do
         sleep 60
@@ -20,7 +17,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# set -e
+
 
 run_docker_install() {
     echo "Starting Docker installation..."
@@ -36,8 +33,9 @@ run_tool_setup() {
         install_tools
         start_minikube
         set_kubectl_context
-        apply_terraform
+        setup_terraform
         setup_ingress
+        apply_terraform
 
         echo "SonarQube has been successfully provisioned!"
         echo "Access SonarQube using http://sonarqube.mintos.com"
@@ -57,11 +55,13 @@ set_kubectl_context() {
 }
 
 # Function to initialize and apply Terraform configuration
-apply_terraform() {
+setup_terraform() {
+
     echo "Initializing Terraform..."
     cd terraform-project
     terraform init
-    echo "Applying Terraform configuration..."
+
+    echo "Adding helm repositories..."
 
     # Add the SonarSource SonarQube repository ( Using this instead of Oteemo because it's depracated as stated in ReadMe)
     helm repo add sonarqube https://SonarSource.github.io/helm-chart-sonarqube
@@ -72,8 +72,17 @@ apply_terraform() {
     # Update the repositories
     helm repo update
 
-    terraform apply -auto-approve
     cd -
+}
+
+apply_terraform() {
+
+    echo "Applying Terraform..."
+    cd terraform-project
+    terraform init
+
+    echo "Done! You can now access the application at http://$DOMAIN"
+
 }
 
 # Function to check if necessary tools are installed
@@ -126,7 +135,6 @@ setup_ingress() {
     echo "Adding $HOSTS_ENTRY to /etc/hosts"
     echo "$HOSTS_ENTRY" | sudo tee -a /etc/hosts > /dev/null
 
-    echo "Done! You can now access the application at http://$DOMAIN"
 }
 
 # Execute the main function
