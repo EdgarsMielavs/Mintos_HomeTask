@@ -80,9 +80,7 @@ apply_terraform() {
     echo "Applying Terraform..."
     cd terraform-project
     terraform init
-
-    echo "Done! You can now access the application at http://$DOMAIN"
-
+    
 }
 
 # Function to check if necessary tools are installed
