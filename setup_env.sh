@@ -2,6 +2,32 @@
 
 # set -e
 
+run_docker_install() {
+    echo "Starting Docker installation..."
+    (
+        ./install/install_docker.sh
+    )
+}
+
+run_tool_setup() {
+    echo "Starting Docker installation..."
+    ( 
+        sudo -v
+        install_tools
+        start_minikube
+        set_kubectl_context
+        apply_terraform
+        setup_ingress
+        setup_local_dns
+
+        echo "SonarQube has been successfully provisioned!"
+        echo "Access SonarQube using http://sonarqube.mintos.com"
+
+        echo "Deployment complete! Press any key to exit."
+        read -n 1 -s -r -p "Press any key to continue..."
+    )
+}
+
 # Function to start Minikube cluster
 start_minikube() {
     echo "Starting Minikube..."
@@ -20,7 +46,7 @@ apply_terraform() {
     cd terraform-project
     terraform init
     echo "Applying Terraform configuration..."
-    
+
     # Add the SonarSource SonarQube repository ( Using this instead of Oteemo because it's depracated as stated in ReadMe)
     helm repo add sonarqube https://SonarSource.github.io/helm-chart-sonarqube
 
@@ -69,32 +95,6 @@ setup_local_dns() {
     pwd
     chmod -x ./localdns_setup.sh
     sudo bash ./localdns_setup.sh
-}
-
-run_tool_setup() {
-    echo "Starting Docker installation..."
-    ( 
-        sudo -v
-        install_tools
-        start_minikube
-        set_kubectl_context
-        apply_terraform
-        setup_ingress
-        setup_local_dns
-
-        echo "SonarQube has been successfully provisioned!"
-        echo "Access SonarQube using http://sonarqube.mintos.com"
-
-        echo "Deployment complete! Press any key to exit."
-        read -n 1 -s -r -p "Press any key to continue..."
-    )
-}
-
-run_docker_install() {
-    echo "Starting Docker installation..."
-    (
-        ./install/install_docker.sh
-    )
 }
 
 # Execute the main function
