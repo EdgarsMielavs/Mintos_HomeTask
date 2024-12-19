@@ -88,10 +88,13 @@ setup_ingress() {
 }
 
 setup_local_dns() {
-    ls -la 
-    pwd
+
     chmod -x ./localdns_setup.sh
     sudo bash ./localdns_setup.sh
+
+    echo "Restarting NGINX Ingress controller..."
+    kubectl rollout restart deployment ingress-nginx-controller -n ingress-nginx
+    
 }
 
 # Execute the main function
