@@ -22,9 +22,6 @@ run_tool_setup() {
 
         echo "SonarQube has been successfully provisioned!"
         echo "Access SonarQube using http://sonarqube.mintos.com"
-
-        echo "Deployment complete! Press any key to exit."
-        read -n 1 -s -r -p "Press any key to continue..."
     )
 }
 
