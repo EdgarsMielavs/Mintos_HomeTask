@@ -1,0 +1,11 @@
+auth:
+  username: postgres
+  password: sonarqube
+  database: sonarqube
+
+# persistence.yaml for PostgreSQL
+persistence:
+  enabled: true
+  storageClass: "standard"  # Use the correct storage class for your environment
+  accessMode: ReadWriteOnce
+  size: 8Gi  # Adjust the size of the Persistent Volume to your needs
