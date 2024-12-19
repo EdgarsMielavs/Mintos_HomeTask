@@ -26,7 +26,7 @@ install_docker() {
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
         # Add user to docker group
-        sudo usermod -aG docker $USER
+        sudo usermod -aG docker $USER && newgrp docker
 
         # Verify Docker installation
         sudo systemctl start docker

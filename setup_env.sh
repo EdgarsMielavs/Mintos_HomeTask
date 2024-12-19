@@ -17,42 +17,29 @@ set_kubectl_context() {
 # Function to initialize and apply Terraform configuration
 apply_terraform() {
     echo "Initializing Terraform..."
+    cd terraform-project
     terraform init
     echo "Applying Terraform configuration..."
+    
+    # Add the SonarSource SonarQube repository ( Using this instead of Oteemo because it's depracated as stated in ReadMe)
+    helm repo add sonarqube https://SonarSource.github.io/helm-chart-sonarqube
+
+    # Add the Bitnami PostgreSQL repository
+    helm repo add bitnami https://charts.bitnami.com/bitnami
+
+    # Update the repositories
+    helm repo update
+
     terraform apply -auto-approve
+    cd -
 }
 
 # Function to check if necessary tools are installed
-check_tools() {
-    echo "Checking if necessary tools are installed..."
-    ./install/install_docker.sh
+install_tools() {
+    echo "Checking if other necessary tools are installed..."
     ./install/install_minikube.sh
     ./install/install_helm3.sh
     ./install/install_terraform.sh
-}
-
-# Function to provision SonarQube and PostgreSQL using Helm
-provision_sonarqube() {
-    echo "Provisioning SonarQube and PostgreSQL using Helm..."
-
-    # Install Nginx Ingress Controller
-    echo "Installing Nginx Ingress Controller..."
-    helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-    helm install nginx-ingress ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
-
-    # Install PostgreSQL via Helm
-    echo "Installing PostgreSQL via Helm..."
-    helm repo add bitnami https://charts.bitnami.com/bitnami
-    helm install postgresql bitnami/postgresql --set postgresqlPassword=sonarqube
-
-    # Install SonarQube via Helm
-    echo "Installing SonarQube via Helm..."
-    helm repo add sonarsource https://charts.sonarsource.com
-    helm install sonarqube sonarsource/sonarqube \
-        --set sonarPostgresql.databaseUrl=jdbc:postgresql://postgresql.default.svc.cluster.local:5432/sonarqube \
-        --set sonarPostgresql.username=postgres \
-        --set sonarPostgresql.password=sonarqube \
-        --set persistence.enabled=true
 }
 
 # Function to verify if everything is running correctly
@@ -64,24 +51,52 @@ verify_deployment() {
     kubectl get svc -n default
 }
 
-# Main execution
-main() {
-    
-    # Request sudo password to ensure we have the necessary permissions
-    sudo -v
+setup_ingress() {
+    echo "Setting up ingress..."
 
-    check_tools
-    start_minikube
-    set_kubectl_context
-    apply_terraform
-    # provision_sonarqube
-    # verify_deployment
-    # echo "SonarQube has been successfully provisioned!"
-    # echo "Access SonarQube using the Minikube URL."
+    helm upgrade --install ingress-nginx ingress-nginx \
+    --repo https://kubernetes.github.io/ingress-nginx \
+    --namespace ingress-nginx --create-namespace
 
-    echo "Deployment complete! Press any key to exit."
-    read -n 1 -s -r -p "Press any key to continue..."
+    minikube tunnel &
+
+    kubectl apply -f ingress-conf.yaml 
+
+}
+
+setup_local_dns() {
+    ls -la 
+    pwd
+    chmod -x ./localdns_setup.sh
+    sudo bash ./localdns_setup.sh
+}
+
+run_tool_setup() {
+    echo "Starting Docker installation..."
+    ( 
+        sudo -v
+        install_tools
+        start_minikube
+        set_kubectl_context
+        apply_terraform
+        setup_ingress
+        setup_local_dns
+
+        echo "SonarQube has been successfully provisioned!"
+        echo "Access SonarQube using http://sonarqube.mintos.com"
+
+        echo "Deployment complete! Press any key to exit."
+        read -n 1 -s -r -p "Press any key to continue..."
+    )
+}
+
+run_docker_install() {
+    echo "Starting Docker installation..."
+    (
+        ./install/install_docker.sh
+    )
 }
 
 # Execute the main function
-main
+run_docker_install &
+run_tool_setup
